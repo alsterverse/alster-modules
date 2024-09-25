@@ -1,6 +1,5 @@
 import java.util.Properties
 
-// Load GitHub properties
 val githubProperties = Properties().apply {
     load(rootProject.file("github.properties").inputStream())
 }
@@ -11,17 +10,20 @@ plugins {
     `maven-publish`
 }
 
+group = "se.alster"
+version = "1.0.1"
+
+
 kotlin {
-    androidTarget()
-    listOf(
-        iosX64(),
-        iosArm64(),
-        iosSimulatorArm64()
-    ).forEach { iosTarget ->
-        iosTarget.compilations.getByName("main") {
-            val nskeyvalueobserving by cinterops.creating
-        }
+    androidTarget {
+        publishLibraryVariants("release", "debug")
     }
+
+
+    iosX64()
+    iosArm64()
+    iosSimulatorArm64()
+
     jvmToolchain(17)
 
     sourceSets {
@@ -46,13 +48,11 @@ android {
     }
 }
 
+
 publishing {
     publications {
         create<MavenPublication>("gpr") {
             from(components["kotlin"])
-            groupId = "se.alster"
-            artifactId = "player"
-            version = "1.0.0"
         }
     }
     repositories {
