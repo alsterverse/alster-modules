@@ -14,5 +14,5 @@ dependencyResolutionManagement {
     }
 }
 
-rootProject.name = "alster"
+rootProject.name = "alster-modules"
 include(":player")
