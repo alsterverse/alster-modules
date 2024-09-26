@@ -43,20 +43,6 @@ gpr.token=YOUR_GITHUB_TOKEN
 2. Select "Open an existing project".
 3. Navigate to the cloned repository and open it.
 
-## Build and Run
-
-### Android
-
-1. Connect an Android device or start an Android emulator.
-2. Select the `:player` module.
-3. Click on the "Run" button.
-
-### iOS
-
-1. Open the `iosApp` project in Xcode.
-2. Select a target device or simulator.
-3. Click on the "Run" button.
-
 ## Usage
 
 ### PlayerControllerIOS
@@ -111,10 +97,10 @@ To add the `Alster Player` repository to other projects via GitHub Packages, fol
    }
    ```
 
-2. **Add the dependency:**
+2. **Add the dependency to the commonMain source set:**
 
    ```kotlin
-   dependencies {
+   commonMain.dependencies {
        implementation("se.alster:player:1.0.3")
    }
    ```
