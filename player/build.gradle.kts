@@ -7,22 +7,37 @@ val githubProperties = Properties().apply {
 plugins {
     alias(libs.plugins.kotlinMultiplatform)
     alias(libs.plugins.androidLibrary)
-    `maven-publish`
+    id("maven-publish")
 }
 
-group = "se.alster"
-version = "1.0.1"
+val versionName = "1.0.3"
 
+group = "se.alster"
+version = versionName
 
 kotlin {
     androidTarget {
+        compilations.all {
+            kotlinOptions {
+                jvmTarget = "17"
+            }
+        }
         publishLibraryVariants("release", "debug")
     }
 
 
-    iosX64()
-    iosArm64()
-    iosSimulatorArm64()
+    listOf(
+        iosX64(),
+        iosArm64(),
+        iosSimulatorArm64(),
+    ).forEach {
+        it.compilations.getByName("main") {
+            val nskeyvalueobserving by cinterops.creating {
+                defFile("src/nativeInterop/cinterop/nskeyvalueobserving.def")
+            }
+        }
+
+    }
 
     jvmToolchain(17)
 
@@ -53,6 +68,9 @@ publishing {
     publications {
         create<MavenPublication>("gpr") {
             from(components["kotlin"])
+            groupId = "se.alster"
+            artifactId = "player"
+            version = versionName
         }
     }
     repositories {

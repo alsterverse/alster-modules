@@ -32,10 +32,12 @@ import platform.AVFoundation.timeControlStatus
 import platform.CoreMedia.CMTimeMake
 import platform.CoreMedia.kCMTimeZero
 import platform.Foundation.NSKeyValueObservingOptionNew
-import platform.Foundation.NSKeyValueObservingOptions
 import platform.Foundation.NSNotificationCenter
 import platform.Foundation.NSURL
+import platform.Foundation.addObserver
+import platform.Foundation.removeObserver
 import platform.darwin.NSObject
+import platform.foundation.NSKeyValueObservingProtocol
 import se.alster.util.plus
 import se.alster.util.toDuration
 import kotlin.time.Duration
@@ -43,80 +45,8 @@ import kotlin.time.Duration.Companion.milliseconds
 
 private const val PeriodicTimeObserverTimeScale = 600
 
-interface NSKeyValueObserverWrapper {
-    @OptIn(ExperimentalForeignApi::class)
-    fun NSObject.addObserverForKey(
-        forKeyPath: String,
-        options: NSKeyValueObservingOptions = NSKeyValueObservingOptionNew,
-        context: COpaquePointer? = null,
-        observer: NSKeyValueObservingWrapper,
-    ): NSObject
-
-    fun NSObject.removeObserverForKey(
-        observer: NSObject,
-        forKeyPath: String,
-    )
-}
-
-interface NSKeyValueObservingWrapper {
-    @OptIn(ExperimentalForeignApi::class)
-    fun observeValueForKeyPath(
-        keyPath: String?,
-        ofObject: Any?,
-        change: Map<Any?, *>?,
-        context: COpaquePointer?
-    )
-}
-
-/**
- * A minimal wrapper around AVPlayer.
- * ```kotlin
- * // This is a workaround for not able to publish the NSKeyValueObservingProtocol
- * // Sample implementation
- * @OptIn(ExperimentalForeignApi::class)
- * val playerController = PlayerControllerIOS(
- *     object : NSKeyValueObserverWrapper {
- *         override fun NSObject.addObserverForKey(
- *             forKeyPath: String,
- *             options: NSKeyValueObservingOptions,
- *             context: COpaquePointer?,
- *             observer: NSKeyValueObservingWrapper
- *         ): NSObject {
- *             val nsKeyValueObserver = object : NSObject(), NSKeyValueObservingProtocol {
- *                 override fun observeValueForKeyPath(
- *                     keyPath: String?,
- *                     ofObject: Any?,
- *                     change: Map<Any?, *>?,
- *                     context: COpaquePointer?
- *                 ) {
- *                     observer.observeValueForKeyPath(
- *                         keyPath = keyPath,
- *                         ofObject = ofObject,
- *                         change = change,
- *                         context = context
- *                     )
- *                 }
- *             }
- *             addObserver(
- *                 observer = nsKeyValueObserver,
- *                 forKeyPath = forKeyPath,
- *                 options = options,
- *                 context = context
- *             )
- *             return nsKeyValueObserver
- *         }
- *
- *         override fun NSObject.removeObserverForKey(observer: NSObject, forKeyPath: String) {
- *             removeObserver(observer, forKeyPath)
- *         }
- *     }
- * )
- * ```
- */
 @OptIn(ExperimentalForeignApi::class)
-class PlayerControllerIOS(
-    private val observerWrapper: NSKeyValueObserverWrapper
-) : PlayerController {
+class PlayerControllerIOS : PlayerController {
     val avPlayer = AVPlayer()
 
     @OptIn(ExperimentalForeignApi::class)
@@ -127,10 +57,8 @@ class PlayerControllerIOS(
         _positionFlow.value = time.toDuration()
     }
 
-    private var currentItemStatusObserverObject: NSObject? = null
-
     @OptIn(ExperimentalForeignApi::class)
-    private val currentItemStatusObserver = object : NSKeyValueObservingWrapper {
+    private val currentItemStatusObserver = object : NSObject(), NSKeyValueObservingProtocol {
         override fun observeValueForKeyPath(
             keyPath: String?,
             ofObject: Any?,
@@ -152,8 +80,7 @@ class PlayerControllerIOS(
             _hasEnded.value = true
         }
 
-    private var playerTimeControlObserverObject: NSObject? = null
-    private val playerTimeControlObserver = object : NSKeyValueObservingWrapper {
+    private val playerTimeControlObserver = object : NSObject(), NSKeyValueObservingProtocol {
         override fun observeValueForKeyPath(
             keyPath: String?,
             ofObject: Any?,
@@ -182,7 +109,7 @@ class PlayerControllerIOS(
 
     @OptIn(FlowPreview::class)
     override val isLoading: Flow<Boolean> = _isLoading.asStateFlow()
-        .debounce(1.milliseconds) // debounce to prevent flickering from loading to playing
+        .debounce(1.milliseconds.inWholeMilliseconds) // debounce to prevent flickering from loading to playing
 
     override fun isReadyToPlay(): Boolean {
         return if (avPlayer.status == AVPlayerStatusUnknown) {
@@ -203,25 +130,19 @@ class PlayerControllerIOS(
     }
 
     init {
-        observerWrapper.apply {
-            currentItemStatusObserverObject = avPlayer.addObserverForKey(
-                forKeyPath = "timeControlStatus",
-                observer = playerTimeControlObserver
-            )
-        }
+        avPlayer.addObserver(
+            playerTimeControlObserver,
+            "timeControlStatus",
+            NSKeyValueObservingOptionNew,
+            null
+        )
     }
 
     override fun release() {
         avPlayer.pause()
         avPlayer.removeTimeObserver(periodicTimeObserverForInterval)
-        observerWrapper.apply {
-            currentItemStatusObserverObject?.let {
-                avPlayer.removeObserverForKey(it, "status")
-            }
-            playerTimeControlObserverObject?.let {
-                avPlayer.removeObserverForKey(it, "timeControlStatus")
-            }
-        }
+        avPlayer.currentItem?.removeObserver(currentItemStatusObserver, "status")
+        avPlayer.removeObserver(playerTimeControlObserver, "timeControlStatus")
         NSNotificationCenter.defaultCenter.removeObserver(playerItemDidPlayToEndTimeNotification)
     }
 
@@ -231,17 +152,12 @@ class PlayerControllerIOS(
                 NSURL.URLWithString(url)!!
             )
         )
-        currentItemStatusObserverObject?.let {
-            observerWrapper.apply {
-                avPlayer.removeObserverForKey(it, "status")
-            }
-        }
-        observerWrapper.apply {
-            currentItemStatusObserverObject = avPlayer.addObserverForKey(
-                forKeyPath = "status",
-                observer = currentItemStatusObserver
-            )
-        }
+        avPlayer.currentItem?.addObserver(
+            observer = currentItemStatusObserver,
+            forKeyPath = "status",
+            options = NSKeyValueObservingOptionNew,
+            context = null
+        )
         avPlayer.pause()
     }
 
