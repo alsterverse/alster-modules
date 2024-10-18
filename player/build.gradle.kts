@@ -10,7 +10,7 @@ plugins {
     id("maven-publish")
 }
 
-val versionName = "1.0.3"
+val versionName = githubProperties.getProperty("version")
 
 group = "se.alster"
 version = versionName
