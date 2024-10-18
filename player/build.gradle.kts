@@ -7,13 +7,10 @@ val githubProperties = Properties().apply {
 plugins {
     alias(libs.plugins.kotlinMultiplatform)
     alias(libs.plugins.androidLibrary)
-    id("maven-publish")
+    id("com.vanniktech.maven.publish")
 }
 
 val versionName = githubProperties.getProperty("version")
-
-group = "se.alster"
-version = versionName
 
 kotlin {
     androidTarget {
@@ -65,14 +62,6 @@ android {
 
 
 publishing {
-    publications {
-        create<MavenPublication>("gpr") {
-            from(components["kotlin"])
-            groupId = "se.alster"
-            artifactId = "player"
-            version = versionName
-        }
-    }
     repositories {
         maven {
             name = "GitHubPackages"
@@ -83,4 +72,8 @@ publishing {
             }
         }
     }
+}
+
+mavenPublishing {
+    coordinates("se.alster", "player", versionName)
 }
