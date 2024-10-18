@@ -24,7 +24,7 @@ The project is structured as follows:
 ### Clone the Repository
 
 ```sh
-git clone https://github.com/Mats-Hjalmar/alster-modules.git
+git clone https://github.com/Alsterverse/alster-modules.git
 cd alster-modules
 ```
 
@@ -77,20 +77,16 @@ The project is configured to publish to GitHub Packages. To publish a new versio
 ./gradlew publish
 ```
 
-## Adding to Other Projects
+## Installation
 
-To add the `Alster Player` repository to other projects via GitHub Packages, follow these steps:
+To install a module from `Alster Modules`, follow these steps:
 
 1. **Configure the `repositories` block in your `build.gradle.kts` file:**
 
    ```kotlin
    repositories {
        maven {
-           url = uri("https://maven.pkg.github.com/Mats-Hjalmar/alster-modules")
-           credentials {
-               username = project.findProperty("gpr.user") as String? ?: System.getenv("USERNAME")
-               password = project.findProperty("gpr.token") as String? ?: System.getenv("TOKEN")
-           }
+           url = uri("https://maven.pkg.github.com/Alsterverse/alster-modules")
        }
        mavenCentral()
        google()
@@ -101,36 +97,7 @@ To add the `Alster Player` repository to other projects via GitHub Packages, fol
 
    ```kotlin
    commonMain.dependencies {
-       implementation("se.alster:player:1.0.3")
-   }
-   ```
-
-3. **Create a `github.properties` file:**
-
-   ```properties
-   gpr.user=YOUR_GITHUB_USERNAME
-   gpr.token=YOUR_GITHUB_TOKEN
-   ```
-
-4. **Load the `github.properties` file:**
-
-   ```kotlin
-   import java.util.Properties
-
-   val githubProperties = Properties().apply {
-       load(rootProject.file("github.properties").inputStream())
-   }
-
-   repositories {
-       maven {
-           url = uri("https://maven.pkg.github.com/Mats-Hjalmar/alster-modules")
-           credentials {
-               username = githubProperties.getProperty("gpr.user")
-               password = githubProperties.getProperty("gpr.token")
-           }
-       }
-       mavenCentral()
-       google()
+       implementation("se.alster:player:<version>")
    }
    ```
 
