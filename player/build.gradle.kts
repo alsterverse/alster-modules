@@ -76,7 +76,7 @@ publishing {
     repositories {
         maven {
             name = "GitHubPackages"
-            url = uri("https://maven.pkg.github.com/Mats-Hjalmar/alster-modules")
+            url = uri("https://maven.pkg.github.com/Alsterverse/alster-modules")
             credentials {
                 username = githubProperties.getProperty("gpr.user")
                 password = githubProperties.getProperty("gpr.token")
