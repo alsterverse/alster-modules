@@ -19,8 +19,10 @@ jobs:
           java-version: '17'
 
       - name: Load GitHub credentials
-        run: echo "gpr.user=${{ secrets.GH_ACTOR }}" >> $GITHUB_WORKSPACE/gradle.properties
-      - run: echo "gpr.token=${{ secrets.GH_TOKEN }}" >> $GITHUB_WORKSPACE/gradle.properties
+        run: |
+          echo "" >> $GITHUB_WORKSPACE/gradle.properties
+          echo "gpr.user=${{ secrets.GH_ACTOR }}" >> $GITHUB_WORKSPACE/gradle.properties
+          echo "gpr.token=${{ secrets.GH_TOKEN }}" >> $GITHUB_WORKSPACE/gradle.properties
 
       - name: Set version name from tag
         run: echo "version=${{ github.event.release.tag_name }}" >> $GITHUB_WORKSPACE/gradle.properties
