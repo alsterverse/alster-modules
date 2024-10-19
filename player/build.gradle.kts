@@ -7,6 +7,9 @@ val githubProperties = Properties().apply {
 plugins {
     alias(libs.plugins.kotlinMultiplatform)
     alias(libs.plugins.androidLibrary)
+    alias(libs.plugins.compose.compiler)
+    alias(libs.plugins.composeMultiplatform)
+
     id("com.vanniktech.maven.publish")
 }
 
@@ -43,9 +46,11 @@ kotlin {
             implementation(libs.androidx.media3.exoplayer)
             implementation(libs.androidx.media3.exoplayer.hls)
             implementation(libs.androidx.media3.exoplayer.dash)
+            implementation(libs.androidx.media3.ui)
         }
         commonMain.dependencies {
             implementation(libs.kotlinx.coroutines.core)
+            implementation(compose.foundation)
         }
         iosMain.dependencies {
         }
