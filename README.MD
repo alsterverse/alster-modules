@@ -23,6 +23,7 @@ To install a module from `Alster Modules`, follow these steps:
    ```kotlin
    commonMain.dependencies {
        implementation("se.alster:player:<version>")
+       implementation("se.alster:ui-state:<version>")
    }
    ```
 
