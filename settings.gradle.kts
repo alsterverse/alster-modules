@@ -16,3 +16,4 @@ dependencyResolutionManagement {
 
 rootProject.name = "alster-modules"
 include(":player")
+include(":ui-state")
