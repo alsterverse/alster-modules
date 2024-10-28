@@ -6,7 +6,7 @@ compose = "1.5.4"
 compose-material3 = "1.1.2"
 androidx-activityCompose = "1.8.0"
 media3Exoplayer = "1.4.1"
-kotlinxCoroutinesCore = "1.8.1"
+kotlinxCoroutinesCore = "1.9.0"
 vanniktechPublish = "0.25.3"
 
 [libraries]
