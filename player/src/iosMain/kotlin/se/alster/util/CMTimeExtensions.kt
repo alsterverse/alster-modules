@@ -17,5 +17,8 @@ operator fun CValue<CMTime>.plus(duration: Duration): CValue<CMTime> {
 
 @OptIn(ExperimentalForeignApi::class)
 fun CValue<CMTime>.toDuration(): Duration {
+    if (CMTimeGetSeconds(this).isNaN()) {
+        return Duration.INFINITE
+    }
     return CMTimeGetSeconds(this).toDuration(DurationUnit.SECONDS)
 }
