@@ -22,7 +22,7 @@ kotlin {
                 jvmTarget = "17"
             }
         }
-        publishLibraryVariants("release", "debug")
+        publishLibraryVariants("release")
     }
 
 

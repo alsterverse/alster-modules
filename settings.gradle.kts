@@ -17,3 +17,6 @@ dependencyResolutionManagement {
 rootProject.name = "alster-modules"
 include(":player")
 include(":ui-state")
+include(":microphone")
+include(":permissions")
+include(":composeApp")
